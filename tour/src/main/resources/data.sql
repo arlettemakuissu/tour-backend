@@ -1,0 +1,3 @@
+INSERT IGNORE INTO users (id, create_at, email, is_enabled, firstname, lastname, password, role, username, is_verified)
+VALUES (1, CURRENT_TIMESTAMP, 'admin@tour-odissey.abc', 1, 'Deus', 'Ex machina',
+        '$2a$10$TVs/s0gtBhTpJkWQatnKl.gqzb0S9iy2P57gBBHMJ7xXFz0JHYC1e', 'ADMIN', 'admin', 1);

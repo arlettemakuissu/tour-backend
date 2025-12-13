@@ -1,0 +1,71 @@
+server:
+  port: 8081
+  compression:
+    enabled: true
+    mime-types: text/html,application/json
+    min-response-size: 3KB
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: tour-odissay
+
+  datasource:
+    url: jdbc:mysql://172.24.144.1:3309/odissey_travel?ssl-mode=REQUIRED
+    username: odissey
+    password: Password123!
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+    show-sql: true
+    open-in-view: false
+    defer-datasource-initialization: true
+
+  data:
+    jpa:
+      repositories:
+        bootstrap-mode: default
+
+  sql:
+    init:
+      mode: ALWAYS # esegue le istruzioni presenti in resources/dato.sql ad ogni avvio dell'app
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: arlette.makuissukoun@edu.unito.it
+    password: hwioctubxmaudhkz
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            required: true
+
+# LOGGING
+logging:
+  level:
+    org.springframework.boot: info
+    org.hibernate.orm.jdbc.bind: trace
+
+springdoc:
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui/index.html
+    tags-sorter: alpha
+    display-request-duration: true
+
+# CUSTOM PROPERTIES
+jwt:
+  secret: WDs3Ze4284w2B4fyM50gS5c6bm6pkBc8n37j3d7w39u924b2v6452m4gkc4n6s3Y
+  expireInMinutes: 240
+
+passwordExpireIDays: 90

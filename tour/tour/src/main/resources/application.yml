@@ -1,0 +1,73 @@
+server:
+  port: 8081
+  compression:
+    enabled: true
+    mime-types: text/html,application/json
+    min-response-size: 3KB
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: tour-odissey
+
+  datasource:
+    # url: jdbc:mysql://localhost:3306/odissey_travel?ssl-mode=REQUIRED # per Nicholas
+    url: jdbc:mysql://localhost:3309/odissey_travel?ssl-mode=REQUIRED
+    username: odissey # per Nicholas lo username è root
+    password: Password123!
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      dialect: org.hibernate.dialect.MySQLDialect
+      hibernate:
+        format_sql: true
+    show-sql: true
+    open-in-view: false
+    # da settare a true se sql.init.mode: always
+    defer-datasource-initialization: true
+  data:
+    jpa:
+      repositories:
+        bootstrap-mode: DEFAULT
+  sql:
+    init:
+      mode: NEVER # esegue le istruzioni presenti in resources/data.sql ad ogni avvio di applicazione
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: a.valenti@cgmconsulting.it
+    password: fngsvkfuuqvcmhhl
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            required: true
+
+
+# LOGGING
+logging:
+  level:
+    org:
+      springframework:
+        boot: info
+      hibernate:
+        orm:
+          connections:
+            pooling: off
+          jdbc:
+            bind: trace
+
+spring-doc:
+  swagger-ui:
+    enabled: true
+    # http://localhost:8081/api/swagger-ui/index.html
+    path: /swagger-ui/index.html
+    tags-sorter: alpha
+    display-request-duration: true
+

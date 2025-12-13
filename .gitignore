@@ -1,0 +1,16 @@
+# IDE
+.idea/
+.vscode/
+
+# Java
+target/
+*.log
+
+# Docker volumes
+**/mysql-data/
+
+# Env files
+.env
+
+# OS
+.DS_Store

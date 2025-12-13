@@ -1,0 +1,40 @@
+package com.odissay.tour.model.entity;
+
+import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Entity
+public class LoginTraces {
+
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
+    private Integer id;
+
+    @Column(nullable = false)
+    private LocalDateTime loginDate;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(nullable = false)
+    private User user;
+
+
+
+    public LoginTraces( User user) {
+
+        this.user = user;
+        this.loginDate = LocalDateTime.now();
+
+    }
+}
