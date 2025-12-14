@@ -2,7 +2,7 @@
 
 
 
-Backend Spring Boot per la gestione dei tour per Odissay Agency, dockerizzato per facilitare il deployment.
+Backend Spring Boot per la gestione dei tour per Odissey Agency, dockerizzato per facilitare il deployment.
 
 
 
@@ -64,7 +64,7 @@ Costruire e avviare con Docker Compose:
 
 bash
 
-Copier le code
+
 
 docker-compose up --build
 
@@ -75,4 +75,5 @@ Tutte le rotte sono documentate con Swagger:
 
 
 http://localhost:8081/api/swagger-ui/swagger-ui/index.html#/
+
 
