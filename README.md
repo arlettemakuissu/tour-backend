@@ -52,7 +52,7 @@ Backend Spring Boot per la gestione dei tour per Odissey Agency, dockerizzato pe
 
 1\. Clonare il repository:
 
-```bash
+
 
 git clone https://github.com/arlettemakuissu/tour-backend.git
 
@@ -62,7 +62,6 @@ Costruire e avviare con Docker Compose:
 
 
 
-bash
 
 
 
@@ -75,5 +74,6 @@ Tutte le rotte sono documentate con Swagger:
 
 
 http://localhost:8081/api/swagger-ui/swagger-ui/index.html#/
+
 
 
