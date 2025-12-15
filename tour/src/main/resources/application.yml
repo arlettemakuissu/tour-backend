@@ -69,3 +69,12 @@ jwt:
   expireInMinutes: 240
 
 passwordExpireIDays: 90
+
+tour:
+  image:
+    size: 51200   # 50kb
+    width: 600    # in pixel
+    height: 300   # in pixel
+    mimeTypes: image.jpg,image.jpeg,image.png
+    path: C:\Users\DELL\Pictures\Saved Pictures
+

@@ -21,7 +21,8 @@ public class Rating extends AuditableEntity{
     @EqualsAndHashCode.Include
     private RatingId ratingId;
 
-    private int rate; // i voti ammessi vanno da 1 a 5
+    private int rate; // i voti ammessi vanno da 1 a 5// si mettere anche un check al db che non accettano valore fuori da 1  a 5
+
 
 
 

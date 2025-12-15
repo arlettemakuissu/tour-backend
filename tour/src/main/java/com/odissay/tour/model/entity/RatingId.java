@@ -17,7 +17,7 @@ import lombok.Setter;
 public class RatingId {
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @JoinColumn(nullable = false) // impostando id cosi significa un contomer puo dare solo un comento a un determinao tour.
     private Customer customer;
 
     @ManyToOne

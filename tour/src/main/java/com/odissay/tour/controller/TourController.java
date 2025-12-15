@@ -3,6 +3,7 @@ package com.odissay.tour.controller;
 
 import com.odissay.tour.model.dto.reponse.*;
 import com.odissay.tour.model.dto.request.TourRequest;
+import com.odissay.tour.service.FileService;
 import com.odissay.tour.service.TourService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,10 +17,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.RequestPath;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -35,6 +39,7 @@ import static org.springframework.security.authorization.AuthorityReactiveAuthor
 public class TourController {
 
     private final TourService tourService;
+    private final FileService fileService;
 
 
     @Operation(
@@ -196,6 +201,27 @@ public ResponseEntity<TourResponsePaginated>getAllTours(
 
         return new ResponseEntity<>(tourService.earlyCancellation(tourId,customerId),HttpStatus.OK);
     }
+    @Operation(
+            summary = "UPLOAD IMAGE",
+            description = "Questo metodo serve a caricare un'immagine per il tour in oggetto.",
+            tags = {"Tour"},
+            responses = {
+                    @ApiResponse(responseCode="201", description="immagine caricata con successo.", content = @Content(schema = @Schema(implementation = TourDetailResponse.class))),
+                    @ApiResponse(responseCode="400", description="Uno dei seguenti valori di dimensioni (in pixel), peso, estensione non è quello atteso.", content = @Content(schema = @Schema(implementation = CustomErrorResponse.class))),
+                    @ApiResponse(responseCode="404", description="Tour non trovato", content = @Content(schema = @Schema(implementation = CustomErrorResponse.class))),
+                    @ApiResponse(responseCode="500", description="Caricamento file non riuscito", content = @Content(schema = @Schema(implementation = CustomErrorResponse.class)))
+            }
+    )
+    @PostMapping(value = "/{tourId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyAuthority('OPERATOR')")
+    public ResponseEntity<TourDetailResponse> uploadImage(
+            @PathVariable @Min(value = 1, message = "L'id del tour è obbligatorio e deve essere un numero intero positivo") int tourId,
+            @RequestPart MultipartFile file
+    ){
+        return new ResponseEntity<>(fileService.uploadImage(tourId, file), HttpStatus.CREATED);
+    }
 
 
 }
+
+

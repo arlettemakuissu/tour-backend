@@ -35,6 +35,8 @@ public class Tour extends AuditableEntity{
     @Column(nullable = false, length = 15360) // 20Kb
     private String description; // piano di viaggio
 
+
+
     private String image; // path to image <img src="/pic/image_09.jpg">
 
     @Column(nullable = false)
