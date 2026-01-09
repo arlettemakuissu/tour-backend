@@ -1,9 +1,10 @@
 package com.odissay.tour.model.entity;
 
 
+
 import com.odissay.tour.model.entity.emurator.VoucherType;
+import com.odissay.tour.model.entity.listeners.AuditableEntity;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -17,7 +18,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
-public class Vaucher extends AuditableEntity{
+public class Vaucher extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

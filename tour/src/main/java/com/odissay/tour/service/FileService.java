@@ -8,8 +8,10 @@ import com.odissay.tour.model.dto.reponse.TourDetailResponse;
 import com.odissay.tour.model.entity.Tour;
 import com.odissay.tour.model.entity.emurator.TourStatus;
 import com.odissay.tour.repository.TourRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.UUID;
 
 import static org.aspectj.weaver.tools.cache.SimpleCacheFactory.path;
@@ -38,6 +41,8 @@ public class FileService {
     long size;
     @Value("${tour.image.mimeTypes}")
     String[] mimeTypes;
+    @Value("${tour.image.extensions}")
+    String[] extensions;
     @Value("${tour.image.width}")
     int width;
     @Value("${tour.image.height}")
@@ -45,7 +50,7 @@ public class FileService {
     @Value("${tour.image.path}")
     String path;
 
-
+    @Transactional
     public TourDetailResponse uploadImage(int tourId, MultipartFile file){
         Tour tour = tourRepository.findById(tourId)
                 .orElseThrow(()-> new Exception404("Tour non trovato con id "+tourId));
@@ -54,6 +59,9 @@ public class FileService {
 
         if(!checkIsNotEmpty(file))
             throw new Exception400("Il file è vuoto.");
+        if(!checkAnyExtension(file))
+            throw new Exception400("Estensione del file non permessa");
+
 
         if(!checkSize(file, size))
             throw new Exception400("Il file supera la dimesione di "+size);
@@ -61,10 +69,12 @@ public class FileService {
         if(!checkDimension(file, width, height))
             throw new Exception400("Il file non è delle dimensioni di "+width+"px X "+height+"px");
 
-        if(checkExtensions(file, mimeTypes))
+        if(!checMimieType(file, mimeTypes))
             throw new Exception400("Il file non è del tipo consentito");
-        uploadFile(file);
-        return null;
+        String fileToUpload = uploadFile(file,tour.getImage());
+        tourRepository.save(tour);
+
+        return TourDetailResponse.fromEntityToDto(tour);
     }
 
 
@@ -92,7 +102,7 @@ public class FileService {
     }
 
 
-    private boolean checkExtensions(MultipartFile file, String[] mimeTypes){
+    private boolean checMimieType(MultipartFile file, String[] mimeTypes){
         log.info(">>> getContentType: "+file.getContentType());
         String trueMimeType = getTrueMimeType(file);
         for(String s : mimeTypes){
@@ -113,15 +123,17 @@ public class FileService {
     }
 
 
-    private String uploadFile(MultipartFile file){
+    private String uploadFile(MultipartFile file,String oldFile){
 
         String originalFileName = file.getOriginalFilename();
-        String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
+        String extension = originalFileName.substring(originalFileName.lastIndexOf(".") +1);
         String newFileName = UUID.randomUUID().toString() + " ." + extension;
 
         try{
+            if(oldFile!=null){
             Path destinationPath = Paths.get(path + newFileName);
             Files.write(destinationPath,file.getBytes());
+            }
         } catch (IOException e) {
             log.error(">>> "+e.getMessage());
             throw  new Exception500("Impossibile caricare il file");
@@ -130,6 +142,12 @@ public class FileService {
 
     }
 
+    private boolean checkAnyExtension(MultipartFile file) {
+        String extension = FilenameUtils.getExtension(file.getOriginalFilename());
+        if(extension == null || extension.isEmpty())
+            throw new Exception404("Il file è privo di estensione");
+        for(String s : extensions){ if(s.equals(extension))
+            return true; } return false; }
 
 }
 

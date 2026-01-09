@@ -57,6 +57,7 @@ public class CountryController {
     )
 
     @GetMapping ("/active")//https://localhost:8081/api/countries
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<List<CountryResponse>> getActiveCountries(){
 
         List<CountryResponse> list = countryService.getActiveCountries() ;
@@ -76,7 +77,10 @@ public class CountryController {
                     @ApiResponse(responseCode="404", description="Nessuna nazione trovata.", content = @Content(schema = @Schema(implementation = CustomErrorResponse.class)))
             }
     )
+
+
     @GetMapping //https://localhost:8081/api/countries
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<List<CountryResponse>> Countries(){
 
         List<CountryResponse> list = countryService.findAllCountries() ;
@@ -97,7 +101,9 @@ public class CountryController {
                     @ApiResponse(responseCode="409", description="Codice o nome nazione già presenti sul database.", content = @Content(schema = @Schema(implementation = CustomErrorResponse.class)))
             }
     )
-     @PutMapping("/{id}") //https://localhost:8081/api/countries/{id}
+
+    @PutMapping("/{id}") //https://localhost:8081/api/countries/{id}
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ResponseEntity<CountryResponse> update(
        @PathVariable  @Min(value=1 ,message="l'id della nazione è in numero intero > di 1 ") short id,
        @RequestBody @Valid CountryRequest req
@@ -118,8 +124,9 @@ public class CountryController {
             }
     )
 
- @PatchMapping("/{id}")
 
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @PatchMapping("/{id}") // http://localhost:8081/api/countries/{id}
     public ResponseEntity<String>toggleCountryStatus(
             @PathVariable @Min(value =1,message = "l'id neve essere maggiore di 0 e intero" ) short id
  ){
@@ -138,8 +145,9 @@ public class CountryController {
             }
     )
 
- @GetMapping("/{id}")
 
+    @GetMapping("/{id}") // http://localhost:8081/api/countries/{id}
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
  public ResponseEntity<CountryResponse> getCountry(
          @PathVariable
          @Min(value = 1, message = "L'id doit être un entier supérieur à 0") short id) {

@@ -1,0 +1,75 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: auth-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3309/ms_auth?ssl-mode=REQUIRED
+    username: root
+    password: Password123!
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+      show-sql: true
+      open-in-view: false
+      # da settare a true se sql.init.mode: always
+      defer-datasource-initialization: true
+  data:
+    jpa:
+      repositories:
+        bootstrap-mode: DEFAULT
+  sql:
+    init:
+      mode: NEVER # esegue le istruzioni presenti in resources/data.sql ad ogni avvio di applicazione
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  info:
+    java:
+      enabled: true
+    os:
+      enabled: true
+    env:
+      enabled: true
+    defaults:
+      enabled: true
+
+logging:
+  level:
+    org:
+      springframework:
+        boot: info
+        security: info
+      hibernate:
+        orm:
+          connections:
+            pooling: off
+          jdbc:
+            bind: trace
+
+auth:
+  jwt:
+    issuer: "auth-service"
+    audience: "microservices"
+    hmac-secret: "CHANGE_ME_TO_A_LONG_RANDOM_SECRET_32+"
+    roles-claim: "roles"
+    access-token-ttl-seconds: 900 # 15 min
+    refresh-token-ttl-seconds: 1209600 # 14 giorni
+

@@ -1,5 +1,7 @@
 package com.odissay.tour.model.entity;
 
+
+import com.odissay.tour.model.entity.listeners.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,7 +10,7 @@ import lombok.*;
 @Entity
 @Table(name = "branches", uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "agency_id"})})
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false) @ToString
-public class Branch  extends AuditableEntity{
+public class Branch  extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,6 +35,8 @@ public class Branch  extends AuditableEntity{
 
     @Column(name = "is_active")
     private boolean active;
+
+    private String apiKey;
 
     public Branch(String name, String city, String address, String vat, Agency agency) {
         this.name = name;

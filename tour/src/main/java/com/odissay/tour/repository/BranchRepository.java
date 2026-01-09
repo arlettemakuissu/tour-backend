@@ -15,6 +15,7 @@ public interface BranchRepository extends JpaRepository<Branch,Integer> {
     boolean existsByVatAndIdNot(String vat, int id);
     boolean existsByNameAndAgencyIdAndIdNot(String name, int agencyId, int branchId);
     Optional<Branch> findByIdAndActiveTrue(int branchId);
+    boolean existsByApiKeyAndIdNot(String apiKey,int branchId);
 
 
     @Query("SELECT new " +
