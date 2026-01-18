@@ -1,0 +1,89 @@
+server:
+  port: 9090
+
+spring:
+  application:
+    name: gateway
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes-map:
+            auth-service:
+              uri: lb://AUTH-SERVICE # lb -> load balancer
+              predicates:
+                - Path=/auth/**
+            country-service:
+              uri: lb://COUNTRY-SERVICE
+              predicates:
+                - Path=/countries/**
+
+
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  info:
+    java:
+      enabled: true
+    os:
+      enabled: true
+    env:
+      enabled: true
+    defaults:
+      enabled: true
+
+logging:
+  level:
+    org:
+      springframework:
+        boot: info
+
+# CUSTOM PROPERTIES
+gateway-security:
+  jwt:
+    issuer: "auth-service"
+    audience: "microservices"
+    # HS256 shared secret (min 32 chars consigliato)
+    hmac-secret: "CHANGE_ME_TO_A_LONG_RANDOM_SECRET_32+"
+    roles-claim: "roles"     # es: ["USER","ADMIN"]
+    subject-claim: "sub"     # standard JWT
+
+  # Path pubblici (no JWT)
+  public-paths:
+    - /auth/login
+    - /auth/signup
+    - /auth/refresh
+    # Lasciati pubblici solo per comodità. In produzione vanno protetti o proprio non esposti
+    - /actuator/health
+    - /actuator/info
+    - /countries/active
+
+  # RULES
+  rules:
+    # User
+    - path: /auth/register
+      methods: [ POST ]
+      roles: [ ADMIN ]
+    - path: /auth/logout
+      methods: [ POST ]
+      roles: [ ADMIN,CUSTOMER,OPERATOR ]
+    # Country
+    - path: /countries/all
+      methods: [ GET ]
+      roles: [ ADMIN ]
+    - path: /countries/**
+      methods: [ POST,PUT,PATCH ]
+      roles: [ ADMIN ]
+
+

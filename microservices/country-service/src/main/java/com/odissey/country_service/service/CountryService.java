@@ -23,16 +23,16 @@ public class CountryService {
 
     private final CountryRepository countryRepository;
 
-    public CountryResponse create(CountryRequest countryRequest){
+    public CountryResponse create(CountryRequest countryRequest, int userId){
         String id = countryRequest.id().toUpperCase();
-        String name = countryRequest.name().toUpperCase();
+        String name = countryRequest.name();
         if(countryRepository.existsByIdOrName(id, name))
             throw new Exception409("Nazione già presente");
         Country country = new Country(
                 id,
                 name,
                 countryRequest.currency(),
-                1,
+                userId,
                 null
         );
 
@@ -41,7 +41,7 @@ public class CountryService {
     }
 
     @Transactional
-    public CountryResponse update(String id, CountryUpdateRequest countryUpdateRequest){
+    public CountryResponse update(String id, CountryUpdateRequest countryUpdateRequest, int userId){
         Country country = countryRepository.findById(id)
                 .orElseThrow(()-> new Exception404("Nazione non trovata con codice " + id));
 
@@ -50,17 +50,17 @@ public class CountryService {
 
         country.setName(countryUpdateRequest.name());
         country.setCurrency(countryUpdateRequest.currency());
-        country.setUpdatedBy(countryUpdateRequest.updatedBy());
+        country.setUpdatedBy(userId);
 
         return new CountryResponse(country.getId(), country.getName(), country.getCurrency());
     }
 
     @Transactional
-
-    public CountryDetailResponse switchStatus(String id) {
+    public CountryDetailResponse switchStatus(String id, int userId) {
         Country country = countryRepository.findById(id)
                 .orElseThrow(()-> new Exception404("Nazione non trovata con codice " + id));
         country.setActive(!country.isActive());
+        country.setUpdatedBy(userId);
         return new CountryDetailResponse(country.getId(), country.getName(), country.getCurrency(), country.isActive());
     }
 

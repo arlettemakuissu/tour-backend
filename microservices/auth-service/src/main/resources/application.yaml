@@ -1,12 +1,12 @@
 server:
-  port: 8081
+  port: 8091
 
 spring:
   application:
     name: auth-service
 
   datasource:
-    url: jdbc:mysql://localhost:3309/ms_auth?ssl-mode=REQUIRED
+    url: jdbc:mysql://localhost:3310/ms_auth?ssl-mode=REQUIRED
     username: root
     password: Password123!
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -16,10 +16,10 @@ spring:
     properties:
       hibernate:
         format_sql: true
-      show-sql: true
-      open-in-view: false
-      # da settare a true se sql.init.mode: always
-      defer-datasource-initialization: true
+    show-sql: true
+    open-in-view: false
+    # da settare a true se sql.init.mode: always
+    defer-datasource-initialization: true
   data:
     jpa:
       repositories:
@@ -27,7 +27,19 @@ spring:
   sql:
     init:
       mode: NEVER # esegue le istruzioni presenti in resources/data.sql ad ogni avvio di applicazione
-
+Spring:
+ mail:
+  host: smtp.gmail.com
+  port: 587
+  username: arlette.makuissukoun@edu.unito.it
+  password: hwioctubxmaudhkz
+  default-encoding: UTF-8
+  properties:
+    mail:
+      smtp:
+        auth: true
+        starttls:
+            required: true
 eureka:
   client:
     serviceUrl:
@@ -64,12 +76,13 @@ logging:
           jdbc:
             bind: trace
 
+# CUSTOM PROPERTIES
 auth:
   jwt:
     issuer: "auth-service"
     audience: "microservices"
-    hmac-secret: "CHANGE_ME_TO_A_LONG_RANDOM_SECRET_32+"
-    roles-claim: "roles"
-    access-token-ttl-seconds: 900 # 15 min
-    refresh-token-ttl-seconds: 1209600 # 14 giorni
+    hmacSecret: "CHANGE_ME_TO_A_LONG_RANDOM_SECRET_32+"
+    rolesClaim: "roles"
+    accessTokenTtlSeconds: 900        # 15 min
+    refreshTokenTtlSeconds: 1209600   # 14 giorni
 
