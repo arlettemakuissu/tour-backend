@@ -2,9 +2,6 @@ package com.odissey.auth_service.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +11,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
-
 @Getter @Setter @NoArgsConstructor @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class User {
 
@@ -48,9 +44,10 @@ public class User {
     private Integer createdBy;
 
     private Integer updatedBy;
+
     private String displayName;
 
-
+    private String otpCode;
 
     @PrePersist
     protected void onCreate(){
@@ -62,15 +59,14 @@ public class User {
         updatedAt = LocalDateTime.now();
     }
 
-    public User(String username, String email, String passwordHash, String roles, Integer createdBy, Integer updatedBy,String displayName) {
+    public User(String username, String email, String passwordHash, String roles, Integer createdBy, Integer updatedBy, String displayName) {
         this.username = username;
         this.email = email;
         this.passwordHash = passwordHash;
-        this.enabled = true;
         this.roles = roles;
         this.createdBy = createdBy;
         this.updatedBy = updatedBy;
-
-        this.displayName=displayName;
+        this.enabled = true;
+        this.displayName = displayName;
     }
 }

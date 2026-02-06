@@ -8,8 +8,8 @@ public class UserStatusResponse extends UserResponse{
 
     private boolean enabled;
 
-    public UserStatusResponse(int id, String username, String email, String roles,String displayName, boolean enabled) {
-        super(id, username, email, roles,displayName);
+    public UserStatusResponse(int id, String username, String email, String roles, String displayName, boolean enabled) {
+        super(id, username, email, roles, displayName);
         this.enabled = enabled;
     }
 

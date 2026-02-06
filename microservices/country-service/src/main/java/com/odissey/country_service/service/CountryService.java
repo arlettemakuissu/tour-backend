@@ -1,5 +1,7 @@
 package com.odissey.country_service.service;
 
+import com.odissey.country_service.configuration.RabbitConfig;
+import com.odissey.country_service.dto.request.CountryRabbitMessage;
 import com.odissey.country_service.dto.request.CountryRequest;
 import com.odissey.country_service.dto.request.CountryUpdateRequest;
 import com.odissey.country_service.dto.response.CountryDetailResponse;
@@ -11,6 +13,7 @@ import com.odissey.country_service.exception.Exception409;
 import com.odissey.country_service.repository.CountryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,26 +25,36 @@ import java.util.List;
 public class CountryService {
 
     private final CountryRepository countryRepository;
+    private final RabbitTemplate rabbitTemplate;
 
-    public CountryResponse create(CountryRequest countryRequest, int userId){
+    public CountryResponse create(CountryRequest countryRequest, int createdBy){
         String id = countryRequest.id().toUpperCase();
         String name = countryRequest.name();
         if(countryRepository.existsByIdOrName(id, name))
             throw new Exception409("Nazione già presente");
+        // istanzio oggetto country (entità)
         Country country = new Country(
                 id,
                 name,
                 countryRequest.currency(),
-                userId,
+                createdBy,
                 null
         );
-
+        // persisto entità country
         countryRepository.save(country);
+
+        // invio messaggio ad exchange fanout con le sole informazioni della country
+        // che ho appena persistito. La routing key è vuota
+        rabbitTemplate.convertAndSend(
+                RabbitConfig.FANOUT_EXCHANGE,"",
+                CountryRabbitMessage.fromEntityToRabbitMessage(country)
+        );
+
         return new CountryResponse(country.getId(), country.getName(), country.getCurrency());
     }
 
     @Transactional
-    public CountryResponse update(String id, CountryUpdateRequest countryUpdateRequest, int userId){
+    public CountryResponse update(String id, CountryUpdateRequest countryUpdateRequest, int updatedBy){
         Country country = countryRepository.findById(id)
                 .orElseThrow(()-> new Exception404("Nazione non trovata con codice " + id));
 
@@ -50,17 +63,28 @@ public class CountryService {
 
         country.setName(countryUpdateRequest.name());
         country.setCurrency(countryUpdateRequest.currency());
-        country.setUpdatedBy(userId);
+        country.setUpdatedBy(updatedBy);
+
+        rabbitTemplate.convertAndSend(
+                RabbitConfig.FANOUT_EXCHANGE,"",
+                CountryRabbitMessage.fromEntityToRabbitMessage(country)
+        );
 
         return new CountryResponse(country.getId(), country.getName(), country.getCurrency());
     }
 
     @Transactional
-    public CountryDetailResponse switchStatus(String id, int userId) {
+    public CountryDetailResponse switchStatus(String id, int updatedBy) {
         Country country = countryRepository.findById(id)
                 .orElseThrow(()-> new Exception404("Nazione non trovata con codice " + id));
         country.setActive(!country.isActive());
-        country.setUpdatedBy(userId);
+        country.setUpdatedBy(updatedBy);
+
+        rabbitTemplate.convertAndSend(
+                RabbitConfig.FANOUT_EXCHANGE,"",
+                CountryRabbitMessage.fromEntityToRabbitMessage(country)
+        );
+
         return new CountryDetailResponse(country.getId(), country.getName(), country.getCurrency(), country.isActive());
     }
 

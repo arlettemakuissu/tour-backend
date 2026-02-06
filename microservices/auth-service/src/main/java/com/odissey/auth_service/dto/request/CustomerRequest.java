@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
 @Getter
-public class CustomerRequest extends RegisterRequest {
+public class CustomerRequest extends RegisterRequest{
 
     @NotBlank
     private String address;

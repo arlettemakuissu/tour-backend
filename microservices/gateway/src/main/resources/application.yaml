@@ -12,11 +12,20 @@ spring:
             auth-service:
               uri: lb://AUTH-SERVICE # lb -> load balancer
               predicates:
-                - Path=/auth/**
+                - Path=/auth/**,/customer/**
             country-service:
               uri: lb://COUNTRY-SERVICE
               predicates:
                 - Path=/countries/**
+            agency-service:
+              uri: lb://AGENCY-SERVICE
+              predicates:
+                - Path=/agencies/**
+            tour-service:
+              uri: lb://TOUR-SERVICE
+              predicates:
+                - Path=/tours/**
+
 
 
 
@@ -64,10 +73,12 @@ gateway-security:
     - /auth/login
     - /auth/signup
     - /auth/refresh
+    - /auth/confirm
     # Lasciati pubblici solo per comodità. In produzione vanno protetti o proprio non esposti
     - /actuator/health
     - /actuator/info
     - /countries/active
+    - /available-tours
 
   # RULES
   rules:
@@ -85,5 +96,36 @@ gateway-security:
     - path: /countries/**
       methods: [ POST,PUT,PATCH ]
       roles: [ ADMIN ]
+    # Agency
+    - path: /agencies/**
+      methods: [ POST,PUT,PATCH ]
+      roles: [ ADMIN ]
+    - path: /agencies/all
+      methods: [ GET ]
+      roles: [ ADMIN ]
+    - path: /agencies/active
+      methods: [ GET ]
+      roles: [ ADMIN,OPERATOR,CUSTOMER ]
+    # Tours
+    - path: /tours/**
+      methods: [ POST,PUT ]
+      roles: [ OPERATOR ]
+    - path: /tours/**
+      methods: [ PATCH ]
+      roles: [ ADMIN,OPERATOR ]
+    - path: /tours/public/**
+      methods: [ GET ]
+      roles: [ ADMIN,OPERATOR,CUSTOMER ]
+    - path: /tours/private/**
+      methods: [ GET ]
+      roles: [ ADMIN,OPERATOR ]
+    - path: /tours/hero_images/**
+      methods: [ DELETE ]
+      roles: [ ADMIN,OPERATOR ]
+
+      #Booking
+    - path: /booking/**
+      methods: [ GET,POST,PATCH ]
+      roles: [ CUSTOMER ]
 
 

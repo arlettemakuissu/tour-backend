@@ -66,9 +66,10 @@ public class ExceptionManagement {
         Map<HttpStatus, String> status = new HashMap<>();
         status = switch(ex.message()){
             case ErrMsg.BAD_CREDENTIALS, ErrMsg.INVALID_REFRESH_TOKEN, ErrMsg.REFRESH_TOKEN_EXPIRED, ErrMsg.REFRESH_TOKEN_REVOKED -> Map.of(HttpStatus.UNAUTHORIZED, "https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#401");
-            case ErrMsg.USERNAME_TAKEN, ErrMsg.EMAIL_TAKEN -> Map.of(HttpStatus.CONFLICT, "https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#409");
+            case ErrMsg.USERNAME_TAKEN, ErrMsg.EMAIL_TAKEN, ErrMsg.ALREADY_CONFIRMED -> Map.of(HttpStatus.CONFLICT, "https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#409");
             case ErrMsg.USER_NOT_FOUND -> Map.of(HttpStatus.NOT_FOUND, "https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#404");
-            case ErrMsg.INVALID_ROLE -> Map.of(HttpStatus.BAD_REQUEST, "https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#400");
+            case ErrMsg.INVALID_ROLE, ErrMsg.INVALID_OTP, ErrMsg.OTP_EXPIRED -> Map.of(HttpStatus.BAD_REQUEST, "https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#400");
+            case ErrMsg.TERMS_NOT_ACCEPTED -> Map.of(HttpStatus.UNPROCESSABLE_ENTITY, "https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#422");
             default -> Map.of(HttpStatus.INTERNAL_SERVER_ERROR, "https://en.wikipedia.org/wiki/List_of_HTTP_status_codes#500");
         };
 

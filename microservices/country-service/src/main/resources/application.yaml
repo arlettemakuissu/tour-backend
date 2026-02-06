@@ -6,7 +6,7 @@ spring:
     name: country-service
 
   datasource:
-    url: jdbc:mysql://localhost:3310/ms_country?ssl-mode=REQUIRED
+    url: jdbc:mysql://localhost:331O/ms_country?ssl-mode=REQUIRED
     username: root
     password: Password123!
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -27,6 +27,19 @@ spring:
   sql:
     init:
       mode: NEVER # esegue le istruzioni presenti in resources/data.sql ad ogni avvio di applicazione
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    listener:
+      simple:
+        retry:
+          enabled: true # riprova in caso di errore del consumer
+          initial-interval: 3s
+          max-attempts: 3
+
 
 eureka:
   client:

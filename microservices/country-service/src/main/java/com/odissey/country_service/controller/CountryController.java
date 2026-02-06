@@ -24,22 +24,22 @@ public class CountryController {
     private final CountryService countryService;
 
     @PostMapping
-    public ResponseEntity<CountryResponse> create(@RequestBody @Valid CountryRequest countryRequest, @RequestHeader("X-User-Id") int userId){
+    public ResponseEntity<CountryResponse> create(@RequestBody @Valid CountryRequest countryRequest, @RequestHeader("X-User-Id") int createdBy){
         //  return new ResponseEntity<>(countryService.create(countryRequest, userId), HttpStatus.CREATED);
-        return ResponseEntity.status(HttpStatus.CREATED).body(countryService.create(countryRequest, userId));
+        return ResponseEntity.status(HttpStatus.CREATED).body(countryService.create(countryRequest, createdBy));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<CountryResponse> update(
             @PathVariable @Size(min = 2, max = 2) String id,
-            @RequestBody @Valid CountryUpdateRequest countryUpdateRequest, @RequestHeader("X-User-Id") int userId){
-        return ResponseEntity.status(HttpStatus.OK).body(countryService.update(id.toUpperCase(),countryUpdateRequest, userId));
+            @RequestBody @Valid CountryUpdateRequest countryUpdateRequest, @RequestHeader("X-User-Id") int updatedBy){
+        return ResponseEntity.status(HttpStatus.OK).body(countryService.update(id.toUpperCase(),countryUpdateRequest, updatedBy));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<CountryDetailResponse> switchStatus(
-            @PathVariable @Size(min = 2, max = 2) String id, @RequestHeader("X-User-Id") int userId){
-        return ResponseEntity.status(HttpStatus.OK).body(countryService.switchStatus(id.toUpperCase(), userId));
+            @PathVariable @Size(min = 2, max = 2) String id, @RequestHeader("X-User-Id") int updatedBy){
+        return ResponseEntity.status(HttpStatus.OK).body(countryService.switchStatus(id.toUpperCase(), updatedBy));
     }
 
     @GetMapping("/all")

@@ -2,6 +2,7 @@ package com.odissey.auth_service.service;
 
 import com.odissey.auth_service.config.AuthProperties;
 import com.odissey.auth_service.dto.request.CustomerRequest;
+import com.odissey.auth_service.dto.request.GenericMail;
 import com.odissey.auth_service.dto.request.LoginRequest;
 import com.odissey.auth_service.dto.request.RegisterRequest;
 import com.odissey.auth_service.dto.response.LoginResponse;
@@ -16,20 +17,23 @@ import com.odissey.auth_service.exception.ErrMsg;
 import com.odissey.auth_service.repository.CustomerRepository;
 import com.odissey.auth_service.repository.TokenRefreshRepository;
 import com.odissey.auth_service.repository.UserRepository;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -38,16 +42,19 @@ public class AuthService {
     private final AuthProperties authProperties;
     private final TokenRefreshRepository tokenRefreshRepository;
     private final CustomerRepository customerRepository;
+    private final EmailService emailService;
 
+    @Value("${auth.otpExpiresInMinutes}")
+    private int otpExpiresInMinutes;
 
-    public UserResponse register(RegisterRequest registerRequest, int userId) {
+    public UserResponse register(RegisterRequest registerRequest, int createdBy) {
         if (userRepository.existsByUsername(registerRequest.getUsername()))
             throw new AuthException(ErrMsg.USERNAME_TAKEN);
         if (userRepository.existsByEmail(registerRequest.getEmail()))
             throw new AuthException(ErrMsg.EMAIL_TAKEN);
         String roles = null;
         try {
-            roles = Role.valueOf(registerRequest.getRoles().toUpperCase()).name();
+            roles = Role.valueOf(registerRequest.getRole().toUpperCase()).name();
         } catch (IllegalArgumentException e) {
             throw new AuthException(ErrMsg.INVALID_ROLE);
         }
@@ -56,7 +63,8 @@ public class AuthService {
                 registerRequest.getEmail(),
                 encoder.encode(registerRequest.getPassword()),
                 roles,
-                userId, null,registerRequest.getDisplayName()
+                createdBy, null,
+                registerRequest.getDisplayName()
         );
         userRepository.save(user);
         return UserResponse.fromEntityToDto(user);
@@ -85,8 +93,8 @@ public class AuthService {
         tokenRefreshRepository.revokeOldRefreshTokensByUser(user.getId());
         // creo il nuovo refresh token
         tokenRefreshRepository.save(refreshToken);
-        String name = user.getDisplayName() == null?user.getUsername(): user.getDisplayName();
-        return new LoginResponse(name,user.getEmail(), user.getRoles(), "Bearer " + jwt, refreshToken.getId());
+        String name = user.getDisplayName() == null ? user.getUsername() : user.getDisplayName();
+        return new LoginResponse(name, user.getEmail(), user.getRoles(), "Bearer " + jwt, refreshToken.getId());
     }
 
 
@@ -117,8 +125,8 @@ public class AuthService {
         refreshToken.setRevoked(true);
         // creo il nuovo refresh token
         tokenRefreshRepository.save(newRefreshToken);
-    String  name = user.getDisplayName() == null?user.getUsername(): user.getDisplayName();
-        return new LoginResponse(name,user.getEmail(), user.getRoles(), "Bearer " + refreshJwtToken, newRefreshToken.getId());
+        String name = user.getDisplayName() == null ? user.getUsername() : user.getDisplayName();
+        return new LoginResponse(name, user.getEmail(), user.getRoles(), "Bearer " + refreshJwtToken, newRefreshToken.getId());
     }
 
     @Transactional
@@ -149,54 +157,90 @@ public class AuthService {
         return UserStatusResponse.fromEntityToDto(user);
     }
 
-    public String signup(@Valid CustomerRequest customerRequest) {
-      System.out.println("helooooooooo");
-      try{
+    @Transactional
+    public String signup(CustomerRequest customerRequest){
         if(!customerRequest.isAcceptServiceTerms())
-            throw new AuthException((ErrMsg.TERMS_NOT_ACCEPTED));
-        if(userRepository.existsByUsername(customerRequest.getUsername()))
+            throw new AuthException(ErrMsg.TERMS_NOT_ACCEPTED);
+        if (userRepository.existsByUsername(customerRequest.getUsername()))
             throw new AuthException(ErrMsg.USERNAME_TAKEN);
-        if(userRepository.existsByEmail(ErrMsg.EMAIL_TAKEN));
-           String roles = null;
-           System.out.println(customerRequest.getRoles().toUpperCase());
-        System.out.println(Role.CUSTOMER.name());
+        if (userRepository.existsByEmail(customerRequest.getEmail()))
+            throw new AuthException(ErrMsg.EMAIL_TAKEN);
+        String roles = null;
         try {
-            if ((Role.valueOf(customerRequest.getRoles().toUpperCase()).name()).equals(Role.CUSTOMER.name()));
-
-                 roles = Role.CUSTOMER.name();
-                 System.out.println(roles);
-                 System.out.println("hhhhhhhhhhhhhhhhhh");
+            if((Role.valueOf(customerRequest.getRole().toUpperCase()).name()).equals(Role.CUSTOMER.name())){
+                roles = Role.CUSTOMER.name();
+            }
         } catch (IllegalArgumentException e) {
             throw new AuthException(ErrMsg.INVALID_ROLE);
         }
-
-        User user = new User (
+        User user = new User(
                 customerRequest.getUsername(),
                 customerRequest.getEmail(),
                 encoder.encode(customerRequest.getPassword()),
                 roles,
-                null,null,
-
+                null, null,
                 customerRequest.getDisplayName()
-
         );
-
         user.setEnabled(false);
+        user.setOtpCode(generateOtpCode(6));
         userRepository.save(user);
-        Customer customer = new Customer(
-               user,
 
-               customerRequest.getAddress(),
+        Customer customer = new Customer(
+                user,
+                customerRequest.getAddress(),
                 customerRequest.getCity(),
                 customerRequest.isReceiveNewsletter(),
                 customerRequest.isAcceptServiceTerms()
         );
-
-
         customerRepository.save(customer);
-      } catch (Exception e) {
-          throw new RuntimeException(e.getMessage());
-      }
-        return "controlla la tua email e conferma la registrazione";
+
+        // inviare email con codice otp
+        try {
+            emailService.sendMail(sendOtp(user));
+        } catch (MessagingException e){
+            log.error(">>> Errore nell'invio dell'email: "+e.getMessage());
+            throw new AuthException(ErrMsg.EMAIL_NOT_SENT);
+        }
+        return "Controlla la tua email e conferma la registrazione";
+
+    }
+
+    @Transactional
+    public String confirm(String otpCode, String email){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()-> new AuthException(ErrMsg.USER_NOT_FOUND));
+        if(user.getOtpCode() != null && user.getCreatedAt().plusMinutes(otpExpiresInMinutes).isAfter(LocalDateTime.now()))
+            throw new AuthException(ErrMsg.OTP_EXPIRED);
+        if(user.getOtpCode() == null && user.isEnabled())
+            throw new AuthException(ErrMsg.ALREADY_CONFIRMED);
+        if(otpCode.equals(user.getOtpCode()) && !user.isEnabled()) {
+            user.setEnabled(true);
+            user.setOtpCode(null);
+            user.setUpdatedBy(user.getId());
+        } else {
+            throw new AuthException(ErrMsg.INVALID_OTP);
+        }
+        return "Registrazione confermata. Puoi procedere alla login.";
+    }
+
+    // -----------------------------------------------------
+
+    private static String generateOtpCode(int lunghezza) {
+        String numeri = "0123456789";
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder(lunghezza);
+
+        for (int i = 0; i < lunghezza; i++) {
+            sb.append(numeri.charAt(random.nextInt(numeri.length())));
+        }
+        return sb.toString();
+    }
+
+    public static GenericMail sendOtp(User user){
+        GenericMail mail = new GenericMail();
+        mail.setTo(user.getEmail());
+        mail.setSubject("Tour Odissey: conferma di registrazione");
+        mail.setBody("Gentile "+user.getDisplayName() == null ? user.getUsername() : user.getDisplayName()+",\nal fine di confermare la registrazione, clicca sul seguente <a href=''>link</a> ed inserisci il codice otp "+user.getOtpCode());
+        return mail;
     }
 }

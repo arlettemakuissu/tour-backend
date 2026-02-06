@@ -1,0 +1,68 @@
+server:
+  port: 9092
+
+spring:
+  application:
+    name: booking-service
+
+  datasource:
+    url: jdbc:mysql://localhost:3310/ms_booking?ssl-mode=REQUIRED
+    username: root
+    password: Password123!
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: true
+    open-in-view: false
+    # da settare a true se sql.init.mode: always
+    defer-datasource-initialization: true
+  data:
+    jpa:
+      repositories:
+        bootstrap-mode: DEFAULT
+  sql:
+    init:
+      mode: NEVER # esegue le istruzioni presenti in resources/data.sql ad ogni avvio di applicazione
+
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  info:
+    java:
+      enabled: true
+    os:
+      enabled: true
+    env:
+      enabled: true
+    defaults:
+      enabled: true
+
+logging:
+  level:
+    org:
+      springframework:
+        boot: info
+        security: info
+      hibernate:
+        orm:
+          connections:
+            pooling: off
+          jdbc:
+            bind: trace
+
+

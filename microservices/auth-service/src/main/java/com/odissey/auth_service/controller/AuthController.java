@@ -1,9 +1,6 @@
 package com.odissey.auth_service.controller;
 
-import com.odissey.auth_service.dto.request.CustomerRequest;
-import com.odissey.auth_service.dto.request.LoginRequest;
-import com.odissey.auth_service.dto.request.RefreshTokenRequest;
-import com.odissey.auth_service.dto.request.RegisterRequest;
+import com.odissey.auth_service.dto.request.*;
 import com.odissey.auth_service.dto.response.LoginResponse;
 import com.odissey.auth_service.dto.response.UserResponse;
 import com.odissey.auth_service.dto.response.UserStatusResponse;
@@ -25,8 +22,8 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(
-            @RequestBody @Valid RegisterRequest registerRequest, @RequestHeader("X-User-Id") int userId){
-        return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(registerRequest, userId));
+            @RequestBody @Valid RegisterRequest registerRequest, @RequestHeader("X-User-Id") int createdBy){
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(registerRequest, createdBy));
     }
 
     @PostMapping("/login")
@@ -55,11 +52,17 @@ public class AuthController {
     }
 
 
-    // signup dei customer
+    // CUSTOMER ------------------------------------------------
 
-      @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody @Valid CustomerRequest customerRequest ){
+    @PostMapping("/signup")
+    public ResponseEntity<String> signup(@RequestBody @Valid CustomerRequest customerRequest){
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.signup(customerRequest));
+    }
 
-        return ResponseEntity.status(HttpStatus.OK).body(authService.signup(customerRequest ));
-      }
+    @PatchMapping("/confirm")
+    public ResponseEntity<String> confirm(@RequestBody @Valid RegistrationConfirmRequest registrationConfirmRequest){
+        return ResponseEntity.status(HttpStatus.OK).body(authService.confirm(registrationConfirmRequest.getOtpCode(), registrationConfirmRequest.getEmail().toLowerCase()));
+    }
+
+
 }

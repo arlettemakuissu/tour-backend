@@ -23,7 +23,7 @@ public class Seeder implements CommandLineRunner {
                 "admin@odissey.abc",
                 encoder.encode("Password123!"),
                 Role.ADMIN.name(),
-                1, null,null
+                null, null, null
         );
         userRepository.save(user);
     }

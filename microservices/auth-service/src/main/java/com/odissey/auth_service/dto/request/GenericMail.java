@@ -5,12 +5,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
-@NoArgsConstructor @AllArgsConstructor
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class GenericMail {
 
-    private String subject;//soggetto della mail
-    private String body; // contenuto della mail
-    private String to;   // destinatario della maoil
+    private String subject; // soggetto dell'email
+    private String body;    // contenuto dell'email
+    private String to;      // destinatario dell'email
 }

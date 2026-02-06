@@ -176,6 +176,7 @@ public class JwtGlobalFilter extends OncePerRequestFilter implements Ordered {
         @Override
         public String getHeader(String name) {
             List<String> values = additionalHeaders.get(name);
+            // Controllo che la lista esista e non sia vuota per evitare IndexOutOfBoundsException
             if (values != null && !values.isEmpty()) {
                 return values.get(0);
             }
