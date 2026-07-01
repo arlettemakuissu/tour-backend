@@ -1,8 +1,9 @@
 package com.odissay.tour.model.entity;
 
 
+
+import com.odissay.tour.model.entity.listeners.AuditableEntity;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
 @Entity

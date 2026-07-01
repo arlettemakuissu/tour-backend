@@ -1,6 +1,8 @@
 package com.odissay.tour.model.entity;
 
 
+
+import com.odissay.tour.model.entity.listeners.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

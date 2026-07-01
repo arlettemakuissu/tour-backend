@@ -1,0 +1,16 @@
+services:
+  db:
+    image: mysql:8.4.7
+    container_name: mysql-tour-generator
+    #restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Password123!
+      MYSQL_DATABASE: tour-generator
+      MYSQL_USER: odissey
+      MYSQL_PASSWORD: Password123!
+    ports:
+      - "3308:3306"
+    volumes:
+      - C:/Users/Public/docker_data/mysql/tour-generator8.4.7:/var/lib/mysql
+volumes:
+  db_data:

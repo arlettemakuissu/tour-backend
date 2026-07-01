@@ -1,7 +1,8 @@
 package com.odissay.tour.model.entity;
 
+
 import com.odissay.tour.model.entity.emurator.PayementType;
-import com.odissay.tour.model.entity.emurator.PayementType;
+import com.odissay.tour.model.entity.listeners.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,7 +10,7 @@ import lombok.*;
 @Table(name = "payments")
 @Getter @Setter @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
-public class Payment extends AuditableEntity{
+public class Payment extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

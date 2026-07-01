@@ -28,7 +28,7 @@ public interface CountryRepository extends JpaRepository<Country,Short> {
 
     @Query("SELECT new com.odissay.tour.model.dto.reponse.CountryResponse(c.id,c.code, c.name,c.currency )" +
             " FROM Country c WHERE c.id = :countryId ")// /countryId è il nome della variabile che deve uguale al nome settato
-    Optional<CountryResponse> findCountry(@Param("countryId")short countryId);
-
+    Optional<CountryResponse> findCountry(short countryId);
+    Optional<Country>findByCodeAndActiveTrue(String countryCode );
 
     }

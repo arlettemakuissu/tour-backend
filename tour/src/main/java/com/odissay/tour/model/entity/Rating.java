@@ -1,6 +1,8 @@
 package com.odissay.tour.model.entity;
 
 
+
+import com.odissay.tour.model.entity.listeners.AuditableEntity;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -14,7 +16,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
-public class Rating extends AuditableEntity{
+public class Rating extends AuditableEntity {
 
 
     @EmbeddedId

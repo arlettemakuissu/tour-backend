@@ -1,20 +1,20 @@
 package com.odissay.tour.model.entity;
 
+
 import com.odissay.tour.model.entity.emurator.TourStatus;
+import com.odissay.tour.model.entity.listeners.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
 @Table(name = "tours", uniqueConstraints = {@UniqueConstraint(columnNames = {"name", "branch_id", "start_date"})})
 @Getter @Setter @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
-public class Tour extends AuditableEntity{
+public class Tour extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

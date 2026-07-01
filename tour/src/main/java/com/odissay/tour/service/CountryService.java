@@ -6,6 +6,12 @@ import com.odissay.tour.model.dto.request.CountryRequest;
 import com.odissay.tour.model.entity.Country;
 import com.odissay.tour.model.dto.reponse.CountryResponse;
 import com.odissay.tour.repository.CountryRepository;
+import io.jsonwebtoken.Jwts;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -16,11 +22,22 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CountryService {
 
     private final CountryRepository countryRepository;
+    private static final String CACHE_COUNTRIES_ALL = "countries:all";
+    private static final String CACHE_COUNTRY_DETAIL = "country :detail";
+    private static final String CACHE_COUNTRIES_ACTIVE = "countries:active";
 
-    public CountryResponse save(CountryRequest req){
+   @Caching(evict = {
+           @CacheEvict(cacheNames = CACHE_COUNTRIES_ALL,allEntries = true),
+           @CacheEvict(cacheNames = CACHE_COUNTRIES_ACTIVE,allEntries = true)
+
+
+           }
+   )
+   public CountryResponse save(CountryRequest req){
         // verificare che non esista già una country con code oppure name passati nella request
         String code = req.getCode().toUpperCase().trim();
         String name = req.getName().toUpperCase().trim();
@@ -42,25 +59,29 @@ public class CountryService {
             return s.toUpperCase().trim();
         return s;
     }
-
+    @Cacheable(cacheNames =  CACHE_COUNTRIES_ACTIVE )
     public List<CountryResponse> getActiveCountries(){
 
-   List<CountryResponse> list = countryRepository.findAllActiveCountries();
+   return  countryRepository.findAllActiveCountries();
 
-      return list;
 
     }
-
+    @Cacheable(cacheNames = CACHE_COUNTRIES_ALL)
     public List<CountryResponse> findAllCountries(){
 
-        List<CountryResponse> list = countryRepository.findAllCountries();
+        return countryRepository.findAllCountries();
 
-        return list;
+
 
     }
 
-    @Transactional // tiene aperta la transaction fine tanto che il metodo non si conclude
-    public CountryResponse update (short id,CountryRequest req){
+     @Transactional // tiene aperta la transaction fine tanto che il metodo non si conclude
+     @Caching(put= @CachePut(cacheNames = CACHE_COUNTRY_DETAIL, key="#id"),
+        evict  = {
+           @CacheEvict(cacheNames = CACHE_COUNTRIES_ALL,allEntries = true),
+           @CacheEvict(cacheNames = CACHE_COUNTRIES_ACTIVE , allEntries = true)
+       })
+        public CountryResponse update (short id,CountryRequest req){
         // Query per ricuperare la nazione da aggiunare in base a id
 
        Country country = countryRepository.findById(id)
@@ -75,6 +96,13 @@ public class CountryService {
 
     }
     @Transactional
+    @Caching(
+            evict = {
+                    @CacheEvict(cacheNames = CACHE_COUNTRIES_ACTIVE,allEntries = true),
+                    @CacheEvict(cacheNames = CACHE_COUNTRIES_ALL,allEntries = true),
+                    @CacheEvict(cacheNames = CACHE_COUNTRY_DETAIL,key= "#id")
+            }
+    )
     public String switchCountryStatus ( short id){
 
        Country country = countryRepository.findById(id)
@@ -90,6 +118,8 @@ public class CountryService {
         //country.setActive(!country.isActive());
        return "stato di modificazione della nazione";
    }
+
+   @Cacheable(cacheNames = CACHE_COUNTRY_DETAIL,key = "#id")
    public CountryResponse getCountry(short id){
 
         return countryRepository.findCountry(id)

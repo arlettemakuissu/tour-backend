@@ -1,6 +1,8 @@
 package com.odissay.tour.model.entity;
 
 
+
+import com.odissay.tour.model.entity.listeners.AuditableEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
-public class Agency extends AuditableEntity{
+public class Agency extends AuditableEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
